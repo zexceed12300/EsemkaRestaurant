@@ -15,6 +15,8 @@ import com.zexceed.restaurant.models.OrdersItemDetailsResponse
 import com.zexceed.restaurant.models.OrdersItemResponse
 import com.zexceed.restaurant.models.OrdersResponse
 import com.zexceed.restaurant.models.TableResponse
+import com.zexceed.restaurant.models.staff.StaffTableItemResponse
+import com.zexceed.restaurant.models.staff.StaffTableResponse
 import com.zexceed.restaurant.preferences.AuthPreferences
 import com.zexceed.restaurant.util.Constants.API_BASE_URL
 import com.zexceed.restaurant.util.Constants.TAG
@@ -310,5 +312,49 @@ class ApiServices(context: Context) {
             responseCode = connection.responseCode
         }
         return response
+    }
+
+    suspend fun getListTableStaff() : StaffTableResponse {
+
+        val endpoint = "Table"
+
+        val data = StaffTableResponse()
+
+        withContext(Dispatchers.IO) {
+            try {
+                val url = URL(API_BASE_URL + endpoint)
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                Log.d(TAG, "getListTable: ${preferences.getToken()}")
+                connection.setRequestProperty("Authorization", "Bearer ${preferences.getToken()}")
+                connection.connect()
+
+                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    val inputStream = connection.inputStream
+                    val json = BufferedReader(InputStreamReader(inputStream)).readText()
+                    val jsonArray = JSONArray(json)
+                    for (i in 0 until jsonArray.length()) {
+                        val jsonObject = jsonArray.getJSONObject(i)
+                        val item = StaffTableItemResponse(
+                            id = jsonObject.getString("id"),
+                            number = jsonObject.getInt("number"),
+                            code = jsonObject.getString("code"),
+                            total = jsonObject.getInt("total"),
+                        )
+                        data.add(item)
+                    }
+                } else {
+                    val errorStream = connection.errorStream
+                    errorMessage = BufferedReader(InputStreamReader(errorStream)).readText()
+                }
+
+                responseCode = connection.responseCode
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        
+        return data
     }
 }

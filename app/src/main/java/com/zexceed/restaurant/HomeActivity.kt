@@ -9,6 +9,7 @@ import com.zexceed.restaurant.apiservices.ApiServices
 import com.zexceed.restaurant.databinding.ActivityHomeBinding
 import com.zexceed.restaurant.preferences.AuthPreferences
 import com.zexceed.restaurant.preferences.AuthPreferences.Companion.AUTH_PREF_CUSTOMER
+import com.zexceed.restaurant.preferences.AuthPreferences.Companion.AUTH_PREF_STAFF
 import com.zexceed.restaurant.util.Constants.TAG
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,8 +30,16 @@ class HomeActivity : AppCompatActivity() {
 
         Log.d(TAG, "onCreate: ${preferences.getToken()}")
         if (preferences.isAuthenticated()) {
-            val intent = Intent(this@HomeActivity, MainActivity::class.java)
-            startActivity(intent)
+            when(preferences.getRole()) {
+                AUTH_PREF_CUSTOMER -> {
+                    val intent = Intent(this@HomeActivity, MainActivity::class.java)
+                    startActivity(intent)
+                }
+                AUTH_PREF_STAFF -> {
+                    val intent = Intent(this@HomeActivity, AdminActivity::class.java)
+                    startActivity(intent)
+                }
+            }
         }
 
         binding = ActivityHomeBinding.inflate(layoutInflater)

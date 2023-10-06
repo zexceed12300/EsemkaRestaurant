@@ -9,14 +9,18 @@ import androidx.core.widget.doAfterTextChanged
 import com.zexceed.restaurant.apiservices.ApiServices
 import com.zexceed.restaurant.databinding.ActivityLoginBinding
 import com.zexceed.restaurant.models.AuthRequest
+import com.zexceed.restaurant.preferences.AuthPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
+
+    private lateinit var preferences: AuthPreferences
 
     private fun validateInput(email: String, password: String): Boolean {
         binding.apply {
@@ -37,6 +41,9 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        preferences = AuthPreferences(this@LoginActivity)
+
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -56,9 +63,14 @@ class LoginActivity : AppCompatActivity() {
                             email = email,
                             password = password,
                         ))
-                        runOnUiThread {
+                        withContext(Dispatchers.Main) {
                             if (req.responseCode == HttpURLConnection.HTTP_OK) {
                                 Toast.makeText(this@LoginActivity, "Login Berhasil", Toast.LENGTH_SHORT).show()
+                                if (res != null) {
+                                    preferences.AuthStaff(res.token)
+                                    val intent = Intent(this@LoginActivity, AdminActivity::class.java)
+                                    startActivity(intent)
+                                }
                             } else {
                                 tvMessage.text = "Username and password invalid!"
                                 tvMessage.visibility = View.VISIBLE

@@ -9,20 +9,27 @@ class AuthPreferences(private val context: Context) {
         return context.getSharedPreferences(AUTH_PREF_NAME, Activity.MODE_PRIVATE)
     }
 
-    fun AuthCustomer(code: String) {
+    fun AuthCustomer(token: String) {
+
+        logout()
+
         getSharedPreferences().edit().apply {
-            putString(AUTH_PREF_TOKEN, code)
+            putString(AUTH_PREF_TOKEN, token)
             putString(AUTH_PREF_ROLE, "customer")
             apply()
         }
     }
 
-//    fun AuthStaff(code: String) {
-//        getSharedPreferences().edit().apply {
-//            putString(AUTH_PREF_TOKEN, code)
-//            putString(AUTH_PREF_ROLE, "customer")
-//        }
-//    }
+    fun AuthStaff(token: String) {
+
+        logout()
+
+        getSharedPreferences().edit().apply {
+            putString(AUTH_PREF_TOKEN, token)
+            putString(AUTH_PREF_ROLE, "staff")
+            apply()
+        }
+    }
 
     fun logout() {
         getSharedPreferences().edit().apply {
