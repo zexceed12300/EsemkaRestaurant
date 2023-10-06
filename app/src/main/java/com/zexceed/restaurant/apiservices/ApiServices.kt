@@ -15,8 +15,8 @@ import com.zexceed.restaurant.models.OrdersItemDetailsResponse
 import com.zexceed.restaurant.models.OrdersItemResponse
 import com.zexceed.restaurant.models.OrdersResponse
 import com.zexceed.restaurant.models.TableResponse
-import com.zexceed.restaurant.models.staff.StaffTableItemResponse
-import com.zexceed.restaurant.models.staff.StaffTableResponse
+import com.zexceed.restaurant.models.staff.TableItemResponseStaff
+import com.zexceed.restaurant.models.staff.TableResponseStaff
 import com.zexceed.restaurant.preferences.AuthPreferences
 import com.zexceed.restaurant.util.Constants.API_BASE_URL
 import com.zexceed.restaurant.util.Constants.TAG
@@ -314,11 +314,11 @@ class ApiServices(context: Context) {
         return response
     }
 
-    suspend fun getListTableStaff() : StaffTableResponse {
+    suspend fun getListTableStaff() : TableResponseStaff {
 
         val endpoint = "Table"
 
-        val data = StaffTableResponse()
+        val data = TableResponseStaff()
 
         withContext(Dispatchers.IO) {
             try {
@@ -335,7 +335,7 @@ class ApiServices(context: Context) {
                     val jsonArray = JSONArray(json)
                     for (i in 0 until jsonArray.length()) {
                         val jsonObject = jsonArray.getJSONObject(i)
-                        val item = StaffTableItemResponse(
+                        val item = TableItemResponseStaff(
                             id = jsonObject.getString("id"),
                             number = jsonObject.getInt("number"),
                             code = jsonObject.getString("code"),
@@ -354,6 +354,8 @@ class ApiServices(context: Context) {
                 e.printStackTrace()
             }
         }
+
+
         
         return data
     }
