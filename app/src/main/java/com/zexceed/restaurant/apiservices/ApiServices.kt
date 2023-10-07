@@ -15,6 +15,7 @@ import com.zexceed.restaurant.models.OrdersItemDetailsResponse
 import com.zexceed.restaurant.models.OrdersItemResponse
 import com.zexceed.restaurant.models.OrdersResponse
 import com.zexceed.restaurant.models.TableResponse
+import com.zexceed.restaurant.models.staff.TableDetailsResponseStaff
 import com.zexceed.restaurant.models.staff.TableItemResponseStaff
 import com.zexceed.restaurant.models.staff.TableResponseStaff
 import com.zexceed.restaurant.preferences.AuthPreferences
@@ -354,9 +355,78 @@ class ApiServices(context: Context) {
                 e.printStackTrace()
             }
         }
-
-
-        
         return data
+    }
+
+    suspend fun getTableDetailsStaff(tableId: String) : TableDetailsResponseStaff? {
+
+        val endpoint = "Table/${tableId}"
+
+        var response: TableDetailsResponseStaff? = null
+
+        withContext(Dispatchers.IO) {
+            try {
+                val url = URL(API_BASE_URL+endpoint)
+                val connection = url.openConnection() as HttpURLConnection
+                connection.setRequestProperty("Authorization", "Bearer ${preferences.getToken()}")
+                connection.connect()
+
+                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    val inputStream = connection.inputStream
+                    val res = BufferedReader(InputStreamReader(inputStream)).readText()
+
+                    val table = JSONObject(res)
+
+                    var orders = OrdersResponse()
+                    val jsonArrayOrders = table.getJSONArray("orders")
+                    Log.d(TAG, "getTableDetailsStaff: ${jsonArrayOrders}")
+                    for (i in 0 until jsonArrayOrders.length()) {
+                        val jsonObjectOrder = jsonArrayOrders.getJSONObject(i)
+                        val orderDetails = arrayListOf<OrdersItemDetailsResponse>()
+                        val jsonArrayDetails = JSONArray(jsonObjectOrder.getString("orderDetails"))
+                        for (j in 0 until jsonArrayDetails.length()) {
+                            val details = jsonArrayDetails.getJSONObject(j)
+                            val menu = details.getJSONObject("menu")
+                            orderDetails.add(
+                                OrdersItemDetailsResponse(
+                                    quantity = details.getInt("quantity"),
+                                    subTotal = details.getInt("subTotal"),
+                                    menu = OrdersItemDetailsMenuResponse(
+                                        menuId = menu.getString("menuId"),
+                                        category = menu.getString("category"),
+                                        description = menu.getString("description"),
+                                        name = menu.getString("name"),
+                                        price = menu.getInt("price"),
+                                    ),
+                                )
+                            )
+                        }
+                        orders.add(
+                            OrdersItemResponse(
+                                orderId = jsonObjectOrder.getString("orderId"),
+                                createdAt = jsonObjectOrder.getString("createdAt"),
+                                status = jsonObjectOrder.getString("status"),
+                                orderDetails = orderDetails
+                            )
+                        )
+                    }
+                    response = TableDetailsResponseStaff(
+                        tableId = table.getString("tableId"),
+                        number = table.getInt("number"),
+                        code = table.getString("code"),
+                        closedAt = table.getString("closedAt"),
+                        orders = orders
+                    )
+
+                } else {
+                    val errorStream = connection.errorStream
+                    errorMessage = BufferedReader(InputStreamReader(errorStream)).readText()
+                }
+                responseCode = connection.responseCode
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+        return response
     }
 }

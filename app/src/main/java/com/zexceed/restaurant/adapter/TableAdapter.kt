@@ -1,8 +1,11 @@
 package com.zexceed.restaurant.adapter
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.zexceed.restaurant.AdminTableDetailsActivity
+import com.zexceed.restaurant.AdminTableDetailsActivity.Companion.ADMIN_ORDERS_TABLEID
 import com.zexceed.restaurant.databinding.ItemTableBinding
 import com.zexceed.restaurant.models.staff.TableResponseStaff
 import com.zexceed.restaurant.models.staff.TableItemResponseStaff
@@ -29,7 +32,9 @@ class TableAdapter(private val list: TableResponseStaff) : RecyclerView.Adapter<
                 tvPrice.text = "Rp. ${data.total}"
 
                 itemView.setOnClickListener {
-
+                    val intent = Intent(itemView.context, AdminTableDetailsActivity::class.java)
+                    intent.putExtra(ADMIN_ORDERS_TABLEID, data.id)
+                    itemView.context.startActivity(intent)
                 }
             }
         }

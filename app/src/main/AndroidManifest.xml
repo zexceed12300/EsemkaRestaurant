@@ -17,6 +17,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="34">
         <activity
+            android:name=".AdminTableDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name=".OrdersAdminActivity"
             android:exported="false" />
         <activity
