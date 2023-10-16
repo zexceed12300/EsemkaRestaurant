@@ -15,6 +15,8 @@ import com.zexceed.restaurant.models.OrdersItemDetailsResponse
 import com.zexceed.restaurant.models.OrdersItemResponse
 import com.zexceed.restaurant.models.OrdersResponse
 import com.zexceed.restaurant.models.TableResponse
+import com.zexceed.restaurant.models.staff.TableBadRequestErrorsResponseStaff
+import com.zexceed.restaurant.models.staff.TableBadRequestResponseStaff
 import com.zexceed.restaurant.models.staff.TableDetailsResponseStaff
 import com.zexceed.restaurant.models.staff.TableItemResponseStaff
 import com.zexceed.restaurant.models.staff.TableResponseStaff
@@ -26,6 +28,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
+import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
@@ -427,6 +430,59 @@ class ApiServices(context: Context) {
                 e.printStackTrace()
             }
         }
+        return response
+    }
+
+    suspend fun storeTable(number: Int) : String? {
+        val endpoint = "Table?number=${number}"
+
+        var response: String? = null
+
+        withContext(Dispatchers.IO) {
+            try {
+                val url = URL(API_BASE_URL+endpoint)
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "POST"
+                connection.setRequestProperty("Authorization", "Bearer ${preferences.getToken()}")
+                connection.connect()
+
+                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    val inputStream = connection.inputStream
+                    val res = BufferedReader(InputStreamReader(inputStream)).readText()
+                    response = res
+                } else {
+                    val errorStream = connection.errorStream
+                    val res = BufferedReader(InputStreamReader(errorStream)).readText()
+                    val jsonObject = JSONObject(res)
+
+                    val jsonObjectError = jsonObject.getJSONObject("errors")
+                    val jsonArrayNumber = jsonObjectError.getJSONArray("number")
+                    var number = arrayListOf<String>()
+                    for (i in 0 until jsonArrayNumber.length()) {
+                        number.add(jsonArrayNumber.getString(i))
+                    }
+
+                    val errors = TableBadRequestErrorsResponseStaff(
+                        number = number
+                    )
+
+                    val tableBadRequest = TableBadRequestResponseStaff(
+                        type = jsonObject.getString("type"),
+                        title = jsonObject.getString("title"),
+                        status = jsonObject.getString("status"),
+                        traceId = jsonObject.getString("traceId"),
+                        errors = errors,
+                    )
+
+                    errorMessage = tableBadRequest.errors.number.get(0)
+                }
+                Log.d(TAG, "storeTable: ${connection.responseCode}")
+                responseCode = connection.responseCode
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
         return response
     }
 }

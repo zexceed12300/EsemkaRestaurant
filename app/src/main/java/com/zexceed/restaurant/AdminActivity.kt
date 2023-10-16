@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import androidx.appcompat.app.AlertDialog
+import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.dialog.MaterialDialogs
@@ -18,10 +19,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
 
 class AdminActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAdminBinding
+    private lateinit var dialogBinding: DialogAddTableBinding
 
     private lateinit var mAdapter: TableAdapter
 
@@ -30,6 +33,17 @@ class AdminActivity : AppCompatActivity() {
         binding = ActivityAdminBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        queryTable()
+
+        binding.apply {
+            refreshTable.setOnRefreshListener {
+                queryTable()
+                refreshTable.isRefreshing = false
+            }
+        }
+    }
+
+    private fun queryTable() {
         binding.apply {
             val coroutineScope = CoroutineScope(Dispatchers.IO)
             coroutineScope.launch {
@@ -45,7 +59,6 @@ class AdminActivity : AppCompatActivity() {
                     }
                 }
             }
-
             btnAddTable.setOnClickListener {
                 showAddTableDialog()
             }
@@ -53,17 +66,47 @@ class AdminActivity : AppCompatActivity() {
     }
 
     private fun showAddTableDialog() {
-        val dialogBinding = DialogAddTableBinding.inflate(layoutInflater)
+        dialogBinding = DialogAddTableBinding.inflate(layoutInflater)
         val dialogBuilder = MaterialAlertDialogBuilder(this@AdminActivity)
         dialogBuilder.setView(dialogBinding.root)
         val customDialog = dialogBuilder.create()
 
         dialogBinding.apply {
+
+            etTableNumber.doAfterTextChanged { ilTableNumber.isErrorEnabled = false }
+
             btnCancel.setOnClickListener {
+                customDialog.dismiss()
+            }
+
+            btnOpenTable.setOnClickListener {
+                val number = etTableNumber.text.toString().trim()
+                if (validateData(number)) {
+                    val coroutineScope = CoroutineScope(Dispatchers.IO)
+                    coroutineScope.launch {
+                        val req = ApiServices(this@AdminActivity)
+                        val res = req.storeTable(number = number.toInt())
+                        if (req.responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
+                            ilTableNumber.isErrorEnabled = true
+                            ilTableNumber.error = req.errorMessage
+                        }
+                    }
+                }
                 customDialog.dismiss()
             }
         }
 
         customDialog.show()
+    }
+
+    private fun validateData(number: String): Boolean {
+        dialogBinding.apply {
+            if (number.isEmpty()) {
+                ilTableNumber.isErrorEnabled = true
+                ilTableNumber.error = "fill table number!"
+                return false
+            }
+            return true
+        }
     }
 }
