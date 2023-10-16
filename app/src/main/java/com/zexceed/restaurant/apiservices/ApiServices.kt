@@ -516,4 +516,33 @@ class ApiServices(context: Context) {
 
         return response
     }
+
+    suspend fun changeOrderStatus(tableId: String, orderId: String, status: String) {
+        val endpoint = "Table/${tableId}/Order/${orderId}?status=${status}"
+
+        var response: Any? = null
+
+        withContext(Dispatchers.IO) {
+            try {
+                val url = URL(API_BASE_URL+endpoint)
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "PUT"
+                connection.setRequestProperty("Authorization", "Bearer ${preferences.getToken()}")
+                connection.connect()
+
+                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    val inputStream = connection.inputStream
+                    val res = BufferedReader(InputStreamReader(inputStream)).readText()
+                    response = res
+                } else {
+                    val errorStream = connection.errorStream
+                    val res = BufferedReader(InputStreamReader(errorStream)).readText()
+                    errorMessage = res
+                }
+                responseCode = connection.responseCode
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 }

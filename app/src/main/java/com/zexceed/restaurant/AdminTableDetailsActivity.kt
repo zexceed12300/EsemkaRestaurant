@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zexceed.restaurant.adapter.OrdersAdapter
+import com.zexceed.restaurant.adapter.OrdersStaffAdapter
 import com.zexceed.restaurant.apiservices.ApiServices
 import com.zexceed.restaurant.databinding.ActivityAdminOrdersBinding
 import kotlinx.coroutines.CoroutineScope
@@ -16,17 +17,25 @@ class AdminTableDetailsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAdminOrdersBinding
 
-    private lateinit var mAdapter: OrdersAdapter
+    private lateinit var mAdapter: OrdersStaffAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAdminOrdersBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        mAdapter = OrdersStaffAdapter(
+            tableId = intent.getStringExtra(ADMIN_ORDERS_TABLEID).toString(),
+            onStatusChanged = {
+                queryOrders()
+            }
+        )
+
+        queryOrders()
+    }
+
+    private fun queryOrders() {
         binding.apply {
-
-            mAdapter = OrdersAdapter()
-
             val coroutineScope = CoroutineScope(Dispatchers.IO)
             coroutineScope.launch {
                 val req = ApiServices(this@AdminTableDetailsActivity)
