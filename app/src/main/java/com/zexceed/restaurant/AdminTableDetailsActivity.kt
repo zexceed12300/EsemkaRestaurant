@@ -2,6 +2,7 @@ package com.zexceed.restaurant
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zexceed.restaurant.adapter.OrdersAdapter
 import com.zexceed.restaurant.apiservices.ApiServices
@@ -10,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
 
 class AdminTableDetailsActivity : AppCompatActivity() {
 
@@ -23,8 +25,6 @@ class AdminTableDetailsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.apply {
-
-
 
             mAdapter = OrdersAdapter()
 
@@ -45,6 +45,14 @@ class AdminTableDetailsActivity : AppCompatActivity() {
             }
 
             btnCloseTable.setOnClickListener {
+                val coroutineScope = CoroutineScope(Dispatchers.IO)
+                coroutineScope.launch {
+                    val req = ApiServices(this@AdminTableDetailsActivity)
+                    val res = req.closeTable(intent.getStringExtra(ADMIN_ORDERS_TABLEID).toString())
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@AdminTableDetailsActivity, "Table ${ADMIN_ORDERS_TABLECODE} closed!", Toast.LENGTH_SHORT).show()
+                    }
+                }
                 finish()
             }
         }
