@@ -28,20 +28,6 @@ class HomeActivity : AppCompatActivity() {
 
         preferences = AuthPreferences(this@HomeActivity)
 
-        Log.d(TAG, "onCreate: ${preferences.getToken()}")
-        if (preferences.isAuthenticated()) {
-            when(preferences.getRole()) {
-                AUTH_PREF_CUSTOMER -> {
-                    val intent = Intent(this@HomeActivity, MainActivity::class.java)
-                    startActivity(intent)
-                }
-                AUTH_PREF_STAFF -> {
-                    val intent = Intent(this@HomeActivity, AdminActivity::class.java)
-                    startActivity(intent)
-                }
-            }
-        }
-
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -62,7 +48,7 @@ class HomeActivity : AppCompatActivity() {
                         val res = req.getTable(code)
                         if (req.responseCode == HttpURLConnection.HTTP_OK) {
                             preferences.AuthCustomer(code)
-                            intent = Intent(this@HomeActivity, MainActivity::class.java)
+                            intent = Intent(this@HomeActivity, CustomerActivity::class.java)
                             startActivity(intent)
                         }
                         else {

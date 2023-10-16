@@ -1,38 +1,40 @@
 package com.zexceed.restaurant
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.zexceed.restaurant.databinding.ActivityMainBinding
+import com.zexceed.restaurant.preferences.AuthPreferences
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
+    private lateinit var preferences: AuthPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.hide()
+        preferences = AuthPreferences(this@MainActivity)
 
-        val navView: BottomNavigationView = binding.navView
-
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        val appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.navigation_menu, R.id.navigation_cart, R.id.navigation_orders
-            )
-        )
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        navView.setupWithNavController(navController)
+        binding.apply {
+            if (preferences.isAuthenticated()) {
+                when(preferences.getRole()) {
+                    AuthPreferences.AUTH_PREF_CUSTOMER -> {
+                        val intent = Intent(this@MainActivity, CustomerActivity::class.java)
+                        startActivity(intent)
+                    }
+                    AuthPreferences.AUTH_PREF_STAFF -> {
+                        val intent = Intent(this@MainActivity, AdminActivity::class.java)
+                        startActivity(intent)
+                    }
+                }
+            }
+            preferences.logout()
+            intent = Intent(this@MainActivity, HomeActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
