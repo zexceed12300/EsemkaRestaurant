@@ -98,6 +98,7 @@ class AdminActivity : AppCompatActivity() {
                     }
                 }
                 customDialog.dismiss()
+                queryTable()
             }
         }
 
