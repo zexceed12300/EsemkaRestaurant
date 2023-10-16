@@ -1,6 +1,7 @@
 package com.zexceed.restaurant
 
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -49,6 +50,10 @@ class AdminActivity : AppCompatActivity() {
             coroutineScope.launch {
                 val req = ApiServices(this@AdminActivity)
                 val res = req.getListTableStaff()
+                if (req.responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                    intent = Intent(this@AdminActivity, LoginActivity::class.java)
+                    startActivity(intent)
+                }
                 withContext(Dispatchers.Main) {
                     Log.d(TAG, "onCreate: ${res}")
                     mAdapter = TableAdapter(res)
@@ -90,6 +95,10 @@ class AdminActivity : AppCompatActivity() {
                             ilTableNumber.isErrorEnabled = true
                             ilTableNumber.error = req.errorMessage
                         }
+                        else if (req.responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                            intent = Intent(this@AdminActivity, LoginActivity::class.java)
+                            startActivity(intent)
+                        }
                     }
                 }
                 customDialog.dismiss()
@@ -108,5 +117,9 @@ class AdminActivity : AppCompatActivity() {
             }
             return true
         }
+    }
+
+    override fun onBackPressed() {
+        //super.onBackPressed()
     }
 }
