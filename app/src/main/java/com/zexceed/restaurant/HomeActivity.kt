@@ -94,4 +94,8 @@ class HomeActivity : AppCompatActivity() {
         }
         return false
     }
+
+    override fun onBackPressed() {
+        //super.onBackPressed()
+    }
 }
