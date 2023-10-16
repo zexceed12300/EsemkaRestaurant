@@ -39,6 +39,17 @@ class OrdersFragment : Fragment() {
 
         mAdapter = OrdersAdapter()
 
+        queryOrders()
+
+        binding.apply {
+            refreshOrders.setOnRefreshListener {
+                queryOrders()
+                refreshOrders.isRefreshing = false
+            }
+        }
+    }
+
+    private fun queryOrders() {
         binding.apply {
             val coroutineScope = CoroutineScope(Dispatchers.IO)
             coroutineScope.launch {

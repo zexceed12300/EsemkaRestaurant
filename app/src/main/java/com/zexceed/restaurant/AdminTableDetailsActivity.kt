@@ -32,6 +32,25 @@ class AdminTableDetailsActivity : AppCompatActivity() {
         )
 
         queryOrders()
+
+        binding.apply {
+            refreshOrders.setOnRefreshListener {
+                queryOrders()
+                refreshOrders.isRefreshing = false
+            }
+
+            btnCloseTable.setOnClickListener {
+                val coroutineScope = CoroutineScope(Dispatchers.IO)
+                coroutineScope.launch {
+                    val req = ApiServices(this@AdminTableDetailsActivity)
+                    val res = req.closeTable(intent.getStringExtra(ADMIN_ORDERS_TABLEID).toString())
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@AdminTableDetailsActivity, "Table ${ADMIN_ORDERS_TABLECODE} closed!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                finish()
+            }
+        }
     }
 
     private fun queryOrders() {
@@ -50,18 +69,6 @@ class AdminTableDetailsActivity : AppCompatActivity() {
                         setHasFixedSize(true)
                     }
                 }
-            }
-
-            btnCloseTable.setOnClickListener {
-                val coroutineScope = CoroutineScope(Dispatchers.IO)
-                coroutineScope.launch {
-                    val req = ApiServices(this@AdminTableDetailsActivity)
-                    val res = req.closeTable(intent.getStringExtra(ADMIN_ORDERS_TABLEID).toString())
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@AdminTableDetailsActivity, "Table ${ADMIN_ORDERS_TABLECODE} closed!", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                finish()
             }
         }
     }
