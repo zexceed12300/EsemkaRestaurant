@@ -14,6 +14,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.zexceed.restaurant.databinding.ItemOrdersBinding
 import com.zexceed.restaurant.models.OrdersItemResponse
 import com.zexceed.restaurant.util.Constants.exportDataToExternalFile
+import com.zexceed.restaurant.util.Constants.exportDataToPdf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
@@ -45,29 +49,12 @@ class OrdersAdapter: ListAdapter<OrdersItemResponse, OrdersAdapter.ViewHolder>(D
                 tvMenuPrice.text = menuPrice
 
                 btnExport.setOnClickListener {
-                    exportDataToPdf(itemView.context, data.orderId)
+                    val coroutineScope = CoroutineScope(Dispatchers.Default)
+                    coroutineScope.launch {
+                        exportDataToPdf(itemView.context, data)
+                    }
                 }
             }
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    fun exportDataToPdf(context: Context, ordersId: String) {
-        try {
-            val document = PdfDocument()
-
-            val paint = Paint()
-            val pageInfo1 = PdfDocument.PageInfo.Builder(250, 400, 1).create()
-            val page1 = document.startPage(pageInfo1)
-
-            document.finishPage(page1)
-
-            val outputStream = ByteArrayOutputStream()
-            document.writeTo(outputStream)
-            document.close()
-            exportDataToExternalFile(context, "Order-${ordersId}.pdf", outputStream.toByteArray(), "application/pdf")
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
     }
 

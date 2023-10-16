@@ -2,10 +2,15 @@ package com.zexceed.restaurant.adapter
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import android.os.Build
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -18,8 +23,10 @@ import com.zexceed.restaurant.R
 import com.zexceed.restaurant.apiservices.ApiServices
 import com.zexceed.restaurant.databinding.DialogChangeStatusBinding
 import com.zexceed.restaurant.databinding.ItemOrdersBinding
+import com.zexceed.restaurant.databinding.PdfOrdersInvoiceBinding
 import com.zexceed.restaurant.models.OrdersItemResponse
 import com.zexceed.restaurant.util.Constants.exportDataToExternalFile
+import com.zexceed.restaurant.util.Constants.exportDataToPdf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -59,7 +66,10 @@ class OrdersStaffAdapter(
                 tvMenuPrice.text = menuPrice
 
                 btnExport.setOnClickListener {
-                    exportDataToPdf(itemView.context, data.orderId)
+                    val coroutineScope = CoroutineScope(Dispatchers.Default)
+                    coroutineScope.launch {
+                        exportDataToPdf(itemView.context, data)
+                    }
                 }
 
                 itemView.setOnClickListener {
@@ -107,26 +117,6 @@ class OrdersStaffAdapter(
                 }
             }
 
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    fun exportDataToPdf(context: Context, ordersId: String) {
-        try {
-            val document = PdfDocument()
-
-            val paint = Paint()
-            val pageInfo1 = PdfDocument.PageInfo.Builder(250, 400, 1).create()
-            val page1 = document.startPage(pageInfo1)
-
-            document.finishPage(page1)
-
-            val outputStream = ByteArrayOutputStream()
-            document.writeTo(outputStream)
-            document.close()
-            exportDataToExternalFile(context, "Order-${ordersId}.pdf", outputStream.toByteArray(), "application/pdf")
-        } catch (e: IOException) {
-            e.printStackTrace()
         }
     }
 
