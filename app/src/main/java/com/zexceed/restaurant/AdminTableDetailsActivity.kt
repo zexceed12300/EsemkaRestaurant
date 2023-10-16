@@ -1,8 +1,8 @@
 package com.zexceed.restaurant
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zexceed.restaurant.adapter.OrdersAdapter
 import com.zexceed.restaurant.apiservices.ApiServices
@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.HttpURLConnection
 
 class AdminTableDetailsActivity : AppCompatActivity() {
 

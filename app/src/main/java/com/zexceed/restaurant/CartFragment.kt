@@ -1,20 +1,17 @@
 package com.zexceed.restaurant
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView.Adapter
 import com.zexceed.restaurant.adapter.CartAdapter
 import com.zexceed.restaurant.apiservices.ApiServices
 import com.zexceed.restaurant.databinding.FragmentCartBinding
 import com.zexceed.restaurant.models.OrderRequest
 import com.zexceed.restaurant.preferences.CartPreferences
-import com.zexceed.restaurant.util.Constants.TAG
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

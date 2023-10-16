@@ -38,7 +38,7 @@ class OrdersFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         mAdapter = OrdersAdapter()
-0
+
         binding.apply {
             val coroutineScope = CoroutineScope(Dispatchers.IO)
             coroutineScope.launch {
